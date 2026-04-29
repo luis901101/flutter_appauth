@@ -76,7 +76,8 @@ typedef NS_ENUM(NSInteger, ExternalUserAgent) {
        externalUserAgent:(NSNumber *)externalUserAgent
                   result:(FlutterResult)result
             exchangeCode:(BOOL)exchangeCode
-                   nonce:(NSString *)nonce;
+                   nonce:(NSString *)nonce
+        proxyRedirectUrl:(NSString *_Nullable)proxyRedirectUrl;
 
 - (id<OIDExternalUserAgentSession>)
     performEndSessionRequest:(OIDServiceConfiguration *)serviceConfiguration

@@ -1,4 +1,5 @@
 #import "AppAuthMacOSAuthorization.h"
+#import "FlutterAppAuthMacProxyUserAgent.h"
 
 @implementation AppAuthMacOSAuthorization
 
@@ -12,17 +13,19 @@
        externalUserAgent:(NSNumber *)externalUserAgent
                   result:(FlutterResult)result
             exchangeCode:(BOOL)exchangeCode
-                   nonce:(NSString *)nonce {
+                   nonce:(NSString *)nonce
+        proxyRedirectUrl:(NSString *)proxyRedirectUrl {
   NSString *codeVerifier = [OIDAuthorizationRequest generateCodeVerifier];
   NSString *codeChallenge =
       [OIDAuthorizationRequest codeChallengeS256ForVerifier:codeVerifier];
+  NSString *effectiveRedirectUrl = proxyRedirectUrl ?: redirectUrl;
 
   OIDAuthorizationRequest *request = [[OIDAuthorizationRequest alloc]
       initWithConfiguration:serviceConfiguration
                    clientId:clientId
                clientSecret:clientSecret
                       scope:[OIDScopeUtilities scopesWithArray:scopes]
-                redirectURL:[NSURL URLWithString:redirectUrl]
+                redirectURL:[NSURL URLWithString:effectiveRedirectUrl]
                responseType:OIDResponseTypeCode
                       state:[OIDAuthorizationRequest generateState]
                       nonce:nonce != nil
@@ -36,7 +39,9 @@
   if (exchangeCode) {
     NSObject<OIDExternalUserAgent> *agent =
         [self userAgentWithPresentingWindow:keyWindow
-                          externalUserAgent:externalUserAgent];
+                          externalUserAgent:externalUserAgent
+                          proxyRedirectUrl:proxyRedirectUrl
+                               redirectUrl:redirectUrl];
     return [OIDAuthState
         authStateByPresentingAuthorizationRequest:request
                                 externalUserAgent:agent
@@ -68,7 +73,9 @@
   } else {
     NSObject<OIDExternalUserAgent> *agent =
         [self userAgentWithPresentingWindow:keyWindow
-                          externalUserAgent:externalUserAgent];
+                          externalUserAgent:externalUserAgent
+                          proxyRedirectUrl:proxyRedirectUrl
+                               redirectUrl:redirectUrl];
     return [OIDAuthorizationService
         presentAuthorizationRequest:request
                   externalUserAgent:agent
@@ -136,7 +143,9 @@
   NSWindow *keyWindow = [[NSApplication sharedApplication] keyWindow];
   id<OIDExternalUserAgent> externalUserAgent =
       [self userAgentWithPresentingWindow:keyWindow
-                        externalUserAgent:requestParameters.externalUserAgent];
+                        externalUserAgent:requestParameters.externalUserAgent
+                        proxyRedirectUrl:nil
+                             redirectUrl:@""];
   return [OIDAuthorizationService
       presentEndSessionRequest:endSessionRequest
              externalUserAgent:externalUserAgent
@@ -163,8 +172,21 @@
 
 - (id<OIDExternalUserAgent>)
     userAgentWithPresentingWindow:(NSWindow *)presentingWindow
-                externalUserAgent:(NSNumber *)externalUserAgent {
-  if ([externalUserAgent integerValue] == EphemeralASWebAuthenticationSession) {
+                externalUserAgent:(NSNumber *)externalUserAgent
+                proxyRedirectUrl:(NSString *_Nullable)proxyRedirectUrl
+                     redirectUrl:(NSString *)redirectUrl {
+  NSInteger agentValue = [externalUserAgent integerValue];
+  if (proxyRedirectUrl &&
+      (agentValue == ASWebAuthenticationSession ||
+       agentValue == EphemeralASWebAuthenticationSession)) {
+    NSString *callbackScheme = [NSURL URLWithString:redirectUrl].scheme;
+    return [[FlutterAppAuthMacProxyUserAgent alloc]
+        initWithPresentingWindow:presentingWindow
+                  callbackScheme:callbackScheme
+                proxyRedirectUrl:proxyRedirectUrl
+                       ephemeral:(agentValue == EphemeralASWebAuthenticationSession)];
+  }
+  if (agentValue == EphemeralASWebAuthenticationSession) {
     return [[OIDExternalUserAgentMacNoSSO alloc]
         initWithPresentingWindow:presentingWindow];
   }
