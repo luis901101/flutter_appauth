@@ -221,12 +221,12 @@ AppAuthAuthorization *authorization;
                 clientSecret:requestParameters.clientSecret
                       scopes:requestParameters.scopes
                  redirectUrl:requestParameters.redirectUrl
+             proxyRedirectUrl:requestParameters.proxyRedirectUrl
         additionalParameters:requestParameters.additionalParameters
            externalUserAgent:requestParameters.externalUserAgent
                       result:result
                 exchangeCode:exchangeCode
-                       nonce:requestParameters.nonce
-             proxyRedirectUrl:requestParameters.proxyRedirectUrl];
+                       nonce:requestParameters.nonce];
   } else if (requestParameters.discoveryUrl) {
     NSURL *discoveryUrl = [NSURL URLWithString:requestParameters.discoveryUrl];
     [OIDAuthorizationService
@@ -258,6 +258,9 @@ AppAuthAuthorization *authorization;
                                                         redirectUrl:
                                                             requestParameters
                                                                 .redirectUrl
+                                                    proxyRedirectUrl:
+                                                        requestParameters
+                                                            .proxyRedirectUrl
                                                additionalParameters:
                                                    requestParameters
                                                        .additionalParameters
@@ -268,10 +271,7 @@ AppAuthAuthorization *authorization;
                                                        exchangeCode:exchangeCode
                                                               nonce:
                                                                   requestParameters
-                                                                      .nonce
-                                                    proxyRedirectUrl:
-                                                        requestParameters
-                                                            .proxyRedirectUrl];
+                                                                      .nonce];
                                          }];
   } else {
     NSURL *issuerUrl = [NSURL URLWithString:requestParameters.issuer];
@@ -301,6 +301,9 @@ AppAuthAuthorization *authorization;
                                                       redirectUrl:
                                                           requestParameters
                                                               .redirectUrl
+                                                 proxyRedirectUrl:
+                                                     requestParameters
+                                                         .proxyRedirectUrl
                                              additionalParameters:
                                                  requestParameters
                                                      .additionalParameters
@@ -311,10 +314,7 @@ AppAuthAuthorization *authorization;
                                                      exchangeCode:exchangeCode
                                                             nonce:
                                                                 requestParameters
-                                                                    .nonce
-                                                 proxyRedirectUrl:
-                                                     requestParameters
-                                                         .proxyRedirectUrl];
+                                                                    .nonce];
                                    }];
   }
 }

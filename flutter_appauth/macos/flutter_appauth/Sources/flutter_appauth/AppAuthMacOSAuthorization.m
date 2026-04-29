@@ -9,12 +9,12 @@
             clientSecret:(NSString *)clientSecret
                   scopes:(NSArray *)scopes
              redirectUrl:(NSString *)redirectUrl
+        proxyRedirectUrl:(NSString *)proxyRedirectUrl
     additionalParameters:(NSDictionary *)additionalParameters
        externalUserAgent:(NSNumber *)externalUserAgent
                   result:(FlutterResult)result
             exchangeCode:(BOOL)exchangeCode
-                   nonce:(NSString *)nonce
-        proxyRedirectUrl:(NSString *)proxyRedirectUrl {
+                   nonce:(NSString *)nonce {
   NSString *codeVerifier = [OIDAuthorizationRequest generateCodeVerifier];
   NSString *codeChallenge =
       [OIDAuthorizationRequest codeChallengeS256ForVerifier:codeVerifier];
@@ -40,8 +40,8 @@
     NSObject<OIDExternalUserAgent> *agent =
         [self userAgentWithPresentingWindow:keyWindow
                           externalUserAgent:externalUserAgent
-                          proxyRedirectUrl:proxyRedirectUrl
-                               redirectUrl:redirectUrl];
+                                redirectUrl:redirectUrl
+                           proxyRedirectUrl:proxyRedirectUrl];
     return [OIDAuthState
         authStateByPresentingAuthorizationRequest:request
                                 externalUserAgent:agent
@@ -74,8 +74,8 @@
     NSObject<OIDExternalUserAgent> *agent =
         [self userAgentWithPresentingWindow:keyWindow
                           externalUserAgent:externalUserAgent
-                          proxyRedirectUrl:proxyRedirectUrl
-                               redirectUrl:redirectUrl];
+                                redirectUrl:redirectUrl
+                           proxyRedirectUrl:proxyRedirectUrl];
     return [OIDAuthorizationService
         presentAuthorizationRequest:request
                   externalUserAgent:agent
@@ -144,8 +144,8 @@
   id<OIDExternalUserAgent> externalUserAgent =
       [self userAgentWithPresentingWindow:keyWindow
                         externalUserAgent:requestParameters.externalUserAgent
-                        proxyRedirectUrl:nil
-                             redirectUrl:@""];
+                              redirectUrl:@""
+                         proxyRedirectUrl:nil];
   return [OIDAuthorizationService
       presentEndSessionRequest:endSessionRequest
              externalUserAgent:externalUserAgent
@@ -173,8 +173,8 @@
 - (id<OIDExternalUserAgent>)
     userAgentWithPresentingWindow:(NSWindow *)presentingWindow
                 externalUserAgent:(NSNumber *)externalUserAgent
-                proxyRedirectUrl:(NSString *_Nullable)proxyRedirectUrl
-                     redirectUrl:(NSString *)redirectUrl {
+                      redirectUrl:(NSString *)redirectUrl
+                 proxyRedirectUrl:(NSString *_Nullable)proxyRedirectUrl {
   NSInteger agentValue = [externalUserAgent integerValue];
   if (proxyRedirectUrl &&
       (agentValue == ASWebAuthenticationSession ||
